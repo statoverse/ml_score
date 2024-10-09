@@ -9,16 +9,29 @@ import matplotlib.pyplot as plt
 def load_data():
     # Load the CSV file into a DataFrame
     data_path = 'data/customers.csv'
-    df = pd.read_csv(data_path).sample(frac = 0.05)
+    df = pd.read_csv(data_path)
     # Extract the customer IDs (SK_ID_CURR) column
     customer_ids = df['SK_ID_CURR'].tolist()
     return df, customer_ids
 
+#def extract_features_from_custom(df, customer_id):
+#    # Get the row of the customer
+#    customer_data = df[df['SK_ID_CURR'] == customer_id]
+#    # Drop the SK_ID_CURR and TARGET columns
+#    customer_data = customer_data.drop(columns=['SK_ID_CURR', 'TARGET'], errors='ignore')   
+#   return customer_data
+
 def extract_features_from_custom(df, customer_id):
-    # Get the row of the customer
-    customer_data = df[df['SK_ID_CURR'] == customer_id]
-    # Drop the SK_ID_CURR and TARGET columns
+    import pandas as pd
+    # Filtrer les données du client et forcer le retour sous forme de DataFrame
+    customer_data = df[df['SK_ID_CURR'] == customer_id].copy()
     customer_data = customer_data.drop(columns=['SK_ID_CURR', 'TARGET'], errors='ignore')
+    
+    # Si la sélection n'a pas de colonnes, cela indiquera un problème de données
+    if customer_data.empty:
+        print(f"Aucun client trouvé pour l'ID {customer_id}")
+    elif not isinstance(customer_data, pd.DataFrame):
+        customer_data = pd.DataFrame([customer_data], columns=df.columns.drop(['SK_ID_CURR', 'TARGET'], errors='ignore'))
     
     return customer_data
 

@@ -57,19 +57,25 @@ def explain(customer_id):
         # Appliquer le prétraitement du pipeline sur les données du client
         preprocessor = pipeline.named_steps['preprocessor']
         customer_data = preprocessor.transform(customer_data_raw)
-        
+        customer_data = pd.DataFrame(customer_data,
+                                     columns=customer_data_raw.columns, 
+                                     index = customer_data_raw.index).copy()
+    
+        print(customer_data)
         # Extraire uniquement le modèle final (LogisticRegression)
         model = pipeline.named_steps['model']
         
         # Créer l'explainer avec seulement le modèle final
+        #explainer = shap.Explainer(model, customer_data)
+        
         explainer = shap.Explainer(model, customer_data)
         
         # Calculer les valeurs SHAP
         shap_values = explainer(customer_data)
         
         # Générer et sauvegarder le graphique SHAP
-        plt.figure()
-        shap.summary_plot(shap_values, customer_data, show=False)
+        #plt.figure()
+        shap.waterfall_plot(shap_values[0], show=False)
         plot_path = 'static/shap_global_importance.png'
         plt.savefig(plot_path)
         plt.close()
