@@ -22,6 +22,7 @@
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
             max-width: 500px;
             text-align: center;
+            position: relative;
         }
         h1 {
             font-size: 2.5rem;
@@ -62,6 +63,22 @@
         .green-flag {
             color: green;
         }
+        .explain-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #f5ba13;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+        .explain-button:hover {
+            background-color: #d99a0b;
+        }
     </style>
 </head>
 <body>
@@ -76,6 +93,11 @@
         <div id="flag" class="flag"></div>
 
         <a href="/">Go Back</a>
+        
+        <!-- Explain Button -->
+        <form action="{{ url_for('explain', customer_id=customer_id) }}" method="get">
+            <button type="submit" class="explain-button">Explain</button>
+        </form>
     </div>
 
     <script>
