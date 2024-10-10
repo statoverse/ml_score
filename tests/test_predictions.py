@@ -2,7 +2,7 @@
 
 import pytest
 import joblib
-from functions.functions import load_data, extract_features_from_custom, predict_score
+from ..functions.functions import load_data, extract_features_from_custom, predict_score
 import pandas as pd
 
 @pytest.fixture(scope='module')
