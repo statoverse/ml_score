@@ -38,11 +38,13 @@ def extract_features_from_custom(df, customer_id):
 def predict_score(customer_data):
     # Load the pre-trained model
     model_path = 'score/final_model.joblib'
+    process_path = 'score/preprocessor.joblib'
     model = joblib.load(model_path)
-    
-    # Predict the score (probability)
-    prediction_success = np.round(model.predict_proba(customer_data)[:, 0],3)[0]
-    prediction_failure = np.round(model.predict_proba(customer_data)[:, 1],3)[0]
+    processors = joblib.load(process_path)
+    df_predict = processors.transform(customer_data)
+    df_predict = pd.DataFrame(df_predict,index=customer_data.index,columns=customer_data.columns)
+    prediction_success = np.round(model.predict_proba(df_predict)[:, 0],3)[0]
+    prediction_failure = np.round(model.predict_proba(df_predict)[:, 1],3)[0]
     #decision = model.predict(customer_data)[0]
     if prediction_failure > 0.25:
         decision = "Bank loan not granted"
@@ -51,4 +53,36 @@ def predict_score(customer_data):
         
     return decision, prediction_success, prediction_failure
 
+
+
+def generate_shap_image(customer_data_raw):
+        
+    import joblib
+    import shap
+    import matplotlib.pyplot as plt
+    import pandas as pd
+    
+    # Chemins pour le pipeline et l'explainer
+    process_path = 'score/preprocessor.joblib'
+    explainer_path = 'score/local_importance.joblib'
+    
+    # Charger le préprocesseur et l'explainer
+    processors = joblib.load(process_path)
+    explainer = joblib.load(explainer_path)
+    
+    # Prétraiter les données du client
+    df_predict = processors.transform(customer_data_raw)
+    df_predict = pd.DataFrame(df_predict, index=customer_data_raw.index, columns=customer_data_raw.columns)
+    
+    # Calculer les valeurs SHAP
+    shap_values = explainer(df_predict)
+    
+    # Générer et enregistrer le graphique SHAP
+    plt.figure()
+    shap.waterfall_plot(shap_values[0], show=False)
+    plot_path = 'static/shap_global_importance.png'
+    plt.savefig(plot_path)
+    plt.close()
+
+    return plot_path
 

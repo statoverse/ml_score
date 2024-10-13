@@ -3,7 +3,9 @@ import pandas as pd
 import numpy as np
 import joblib
 import os
+import pickle
 from functions.functions import *
+
 
 # Load data once
 df, customer_ids = load_data()
@@ -49,38 +51,17 @@ def explain(customer_id):
     try:
         # Extraire les données du client
         customer_data_raw = extract_features_from_custom(df, customer_id)
+        print("Extraction des données du client réussie")
         
-        # Charger le pipeline complet
-        model_path = 'score/final_model.joblib'
-        pipeline = joblib.load(model_path)
-        
-        # Appliquer le prétraitement du pipeline sur les données du client
-        preprocessor = pipeline.named_steps['preprocessor']
-        customer_data = preprocessor.transform(customer_data_raw)
-        customer_data = pd.DataFrame(customer_data,
-                                     columns=customer_data_raw.columns, 
-                                     index = customer_data_raw.index).copy()
-    
-        print(customer_data)
-        # Extraire uniquement le modèle final (LogisticRegression)
-        model = pipeline.named_steps['model']
-        
-        # Créer l'explainer avec seulement le modèle final
-        #explainer = shap.Explainer(model, customer_data)
-        
-        explainer = shap.Explainer(model, customer_data)
-        
-        # Calculer les valeurs SHAP
-        shap_values = explainer(customer_data)
-        
-        # Générer et sauvegarder le graphique SHAP
-        #plt.figure()
-        shap.waterfall_plot(shap_values[0], show=False)
-        plot_path = 'static/shap_global_importance.png'
-        plt.savefig(plot_path)
-        plt.close()
+        # Appeler la fonction pour générer l'image SHAP
+        plot_path = generate_shap_image(customer_data_raw)
         
         return render_template('explain.html', plot_path=plot_path)
+    
+    except Exception as e:
+        print("Erreur dans la route explain:", str(e))
+        return "Une erreur s'est produite", 500
+
     
     except Exception as e:
         print("Error in explain route:", str(e))
